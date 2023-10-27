@@ -39,7 +39,7 @@ export const AddPost = () => {
   };
 
   const onClickRemoveImage = () => {
-    
+    document.getElementById('img').remove();
   };
 
   const onChange = React.useCallback((value) => {
@@ -116,7 +116,7 @@ export const AddPost = () => {
         <Button variant="contained" color="error" onClick={onClickRemoveImage} >
           Удалить
         </Button>
-        <img className={styles.image} src={`http://localhost:4444/api/${imageUrl}`} alt="Uploaded" />
+        <img className={styles.image} id="img" src={`http://localhost:4444/api${imageUrl}`} alt="Uploaded" />
         </>
       )}
       <br />

@@ -84,34 +84,77 @@ export const create = async (req, res) => {
         })
     }}
 };
-export const remove = async (req, res) => {
-    try {
-        const postId = req.params.id;
-        PostModel.findOneAndDelete({
-        _id: postId,
-        }).then((doc, err) => {
-            if (err) {
-              console.log(err);
-              return res.status(500).json({
-                message: "Failed to return the post",
-              });
-            }
-            if (!doc) {
-              return res.status(404).json({
-                message: "Post not found",
-              });
-            }
-            res.json({
-                message: 'Successfully Deleted!'
-            });
-          });
+
+export const comment = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    
+    await PostModel.findOneAndUpdate({
+      _id: postId
+    }, { $push: 
+      {
+        comments: {
+          text: req.body.text,
+          postedBy: req.userId
+        }},
+    }, { new: true }, 
+    { returnDocument: "after",}
+).then((doc, err) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({
+          message: "Failed to comment the post",
+        });
+      }
+      if (!doc) {
+        return res.status(404).json({
+          message: "Post not found",
+        });
+      }
+
+  res.json(doc);
+    })
   } catch (err) {
-  console.log(err);
-  res.status(500).json({
-    message: "Error",
+    console.log(err);
+    res.status(500).json({
+      message: "Error",
+      });
+}
+}
+
+export const removeComment = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const commId = req.params.commId;
+   
+    await PostModel.findOneAndUpdate({
+      _id: postId
+    }, {$pull: {comments: {_id: commId}}}).then(
+      (doc, err) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({
+          message: "Failed to return the post",
+        });
+      }
+      if (!doc) {
+        return res.status(404).json({
+          message: "Post not found",
+        });
+      }});
+    res.json({
+      message: "Comment Deleted!"
     });
-   }
+
+    
+  } catch (err) {
+    console.log(err);
+res.status(500).json({
+  message: "Error",
+  });
+}
 };
+
 export const update = async (req, res) => {
     try {
         const postId = req.params.id;
@@ -148,4 +191,34 @@ export const update = async (req, res) => {
           message: "Error",
           });
     }
+};
+
+export const removePost = async (req, res) => {
+  try {
+      const postId = req.params.id;
+      
+      await PostModel.findOneAndDelete({
+      _id: postId,
+      }).then((doc, err) => {
+          if (err) {
+            console.log(err);
+            return res.status(500).json({
+              message: "Failed to return the post",
+            });
+          }
+          if (!doc) {
+            return res.status(404).json({
+              message: "Post not found",
+            });
+          }
+          res.json({
+              message: 'Successfully Deleted!'
+          });
+        });
+} catch (err) {
+console.log(err);
+res.status(500).json({
+  message: "Error",
+  });
+ }
 };
