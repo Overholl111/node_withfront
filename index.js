@@ -13,7 +13,6 @@ app.use(cors());
 app.use('/api/tmp', express.static('tmp'));
 app.use('/api/uploads', express.static('uploads'))
 app.use('/api', router);
-app.get('/posts/tags', PostController.getLastTags);
 
 async function startApp() {
     try {

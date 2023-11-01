@@ -34,7 +34,9 @@ router.get('/posts/:id', PostController.getOne);
 router.get('/posts/tags', PostController.getLastTags);
 router.post('/posts',checkAuth, postCreateValidation, PostController.create);
 router.put('/posts/:id',checkAuth, PostController.comment);
-router.delete('/posts/:id/:commId', checkAuth, PostController.removeComment);
+router.get('/posts/:id/comments', PostController.getComments);
+router.delete('/post/:id/:commId', checkAuth, PostController.removeComment);
+
 router.patch('/posts/:id', PostController.update);
 router.delete('/posts/:id', PostController.removePost);
 

@@ -1,8 +1,9 @@
 import PostModel from '../models/PostModel.js'
 
+
 export const getAll = async (req, res) => {
     try {
-        const posts = await PostModel.find().populate({ path: "user", select: ["name", "avatar"] }).exec();
+        const posts = await PostModel.find().populate({ path: "user", select: ["fullName", "avatar"] }).exec();
 
         res.json(posts);
     } catch (err) {
@@ -16,6 +17,7 @@ export const getAll = async (req, res) => {
 export const getOne = async (req, res) => {
     try {
       const postId = req.params.id;
+
   
     PostModel.findOneAndUpdate(
     {
@@ -27,7 +29,10 @@ export const getOne = async (req, res) => {
     {
       returnDocument: "after",
     }
-  ).populate({ path: "user", select: ["name", "avatar"] }).then((doc, err) => {
+  ).populate([{ 
+    path: "comments", populate: { path: "postedBy", select: ["fullName", "avatar"] }
+  }, { 
+    path: "user", select: ["fullName", "avatar"] }]).then((doc, err) => {
     if (err) {
       console.log(err);
       return res.status(500).json({
@@ -87,11 +92,7 @@ export const create = async (req, res) => {
 
 export const comment = async (req, res) => {
   try {
-    const postId = req.params.id;
-    
-    await PostModel.findOneAndUpdate({
-      _id: postId
-    }, { $push: 
+    await PostModel.findByIdAndUpdate(req.params.id, { $push:
       {
         comments: {
           text: req.body.text,
@@ -120,7 +121,22 @@ export const comment = async (req, res) => {
       message: "Error",
       });
 }
+};
+
+export const getComments = async (req, res) => {
+  try{
+    const post = await PostModel.findById(req.params.id).populate({ 
+      path: "comments", populate: { path: "postedBy", select: ["fullName", "avatar"] }
+    });
+    const data = post.comments;
+    res.json(data);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+        message: 'Couldnt get comms'
+    })
 }
+};
 
 export const removeComment = async (req, res) => {
   try {

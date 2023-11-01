@@ -42,9 +42,6 @@ export const AddPost = () => {
     document.getElementById('img').remove();
   };
 
-  const onChange = React.useCallback((value) => {
-    setValue(value);
-  }, []);
 
 
 

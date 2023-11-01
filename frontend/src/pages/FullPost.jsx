@@ -2,40 +2,55 @@ import React from "react";
 import { useParams } from "react-router-dom"; 
 import axios from "../axios";
 import ReactMarkdown from "react-markdown";
+import { useDispatch, useSelector } from 'react-redux';
+
 
 import { Post } from "../components/Post";
 import { Index } from "../components/AddComment";
 import { CommentsBlock } from "../components/CommentsBlock";
+import { fetchComments } from "../redux/slices/posts";
+import { SideBlock } from "../components/SideBlock";
+
+
 
 
 
 
 export const FullPost = () => {
   const [data, setData] = React.useState();
+  const { comments } = useSelector(state => state.posts);
   const [isLoading, setLoading] = React.useState(true);
   const {id} = useParams();
+  const dispatch = useDispatch();
+
 
 
 
   React.useEffect(() => {
-    
+
+    const isCommentsLoading = comments.status === 'loading';
+
+    dispatch(fetchComments(id));
+
     (axios.get(`/posts/${id}`)
     .then(res => {
       setData(res.data);
       setLoading(false);
     })
+    
     .catch(err => {
       console.warn(err);
       alert('Error');
     }))
-  });
+  },[]);
+
 
 
   if (isLoading) {
     return <Post isLoading={isLoading} isFullPost/>;
   }
 
-  return (
+  else return (
     <>
       <Post
         id={data._id}
@@ -50,27 +65,25 @@ export const FullPost = () => {
       >
 <ReactMarkdown children={data.text}/>
       </Post>
-      <CommentsBlock
-        items={[
-          {
-            user: {
-              fullName: "Вася Пупкин",
-              avatarUrl: "https://mui.com/static/images/avatar/1.jpg",
-            },
-            text: "Это тестовый комментарий 555555",
-          },
-          {
-            user: {
-              fullName: "Иван Иванов",
-              avatarUrl: "https://mui.com/static/images/avatar/2.jpg",
-            },
-            text: "When displaying three lines or more, the avatar is not aligned at the top. You should set the prop to align the avatar at the top",
-          },
-        ]}
-        isLoading={false}
+      <SideBlock title="Комментарии">
+      {(comments !== undefined) ? (comments.items).map((comment, index)  => (    
+          <CommentsBlock key={index}
+            postedBy={comment.postedBy.fullName}
+            text={comment.text}
+            isLoading={false}
       >
-        <Index />
-      </CommentsBlock>
+            
+          </CommentsBlock>
+      )) : (
+        <CommentsBlock
+        postedBy="Это могли бы быть вы"
+        text="Это мог бы быть ваш комментарий"
+        isLoading={false}
+        >
+          </CommentsBlock>
+      )}
+      </SideBlock>
+      <Index />
     </>
   );
 };
