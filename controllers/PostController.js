@@ -3,7 +3,7 @@ import PostModel from '../models/PostModel.js'
 
 export const getAll = async (req, res) => {
     try {
-        const posts = await PostModel.find().populate({ path: "user", select: ["fullName", "avatar"] }).exec();
+        const posts = await PostModel.find().populate({ path: "user", select: ["fullName", "avatarUrl"] }).exec();
 
         res.json(posts);
     } catch (err) {
@@ -30,9 +30,9 @@ export const getOne = async (req, res) => {
       returnDocument: "after",
     }
   ).populate([{ 
-    path: "comments", populate: { path: "postedBy", select: ["fullName", "avatar"] }
+    path: "comments", populate: { path: "postedBy", select: ["fullName", "avatarUrl"] }
   }, { 
-    path: "user", select: ["fullName", "avatar"] }]).then((doc, err) => {
+    path: "user", select: ["fullName", "avatarUrl"] }]).then((doc, err) => {
     if (err) {
       console.log(err);
       return res.status(500).json({
@@ -56,18 +56,34 @@ export const getOne = async (req, res) => {
 
 export const getLastTags = async (req, res) => {
   try {
-    const posts = await PostModel.find().limit(5).exec();
+    const posts = await PostModel.find().exec();
 
-    const tags = posts.map(obj => obj.tags).flat().slice(0, 4);
+    const tags = posts.map(obj => obj.tags).flat().slice(0, 10);
 
     res.json(tags);
 } catch (err) {
     console.log(err);
     res.status(500).json({
         message: 'Couldnt get tags'
-    })
+    });
 }
 };
+
+export const getTag = async (req, res) => {
+  try{
+  const tag = req.params.tag;
+
+  const posts = await PostModel.find({
+    tags: tag
+  }).populate({ path: "user", select: ["fullName", "avatarUrl"] }).exec();
+
+  res.json(posts);
+} catch (err) {
+  console.log(err);
+  res.status(500).json({
+    message: 'Coudnt get tag'
+  });
+}};
 
 export const create = async (req, res) => {
     try {
@@ -75,7 +91,7 @@ export const create = async (req, res) => {
             title: req.body.title,
             text: req.body.text,
             imageUrl: req.body.imageUrl,
-            tags: req.body.tags,
+            tags: req.body.tags.split(','),
             user: req.userId,
         });
 
@@ -92,14 +108,14 @@ export const create = async (req, res) => {
 
 export const comment = async (req, res) => {
   try {
-    await PostModel.findByIdAndUpdate(req.params.id, { $push:
+    const postId = req.params.id
+    await PostModel.findByIdAndUpdate(postId, { $push:
       {
         comments: {
           text: req.body.text,
           postedBy: req.userId
         }},
-    }, { new: true }, 
-    { returnDocument: "after",}
+    }, { new: true },
 ).then((doc, err) => {
       if (err) {
         console.log(err);
@@ -114,7 +130,19 @@ export const comment = async (req, res) => {
       }
 
   res.json(doc);
-    })
+    });
+
+    await PostModel.findOneAndUpdate(
+      {
+        _id: postId
+      },
+      {
+        $inc: { commentsCount: 1 },
+      },
+      {
+        returnDocument: "after",
+      }
+    );
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -126,7 +154,7 @@ export const comment = async (req, res) => {
 export const getComments = async (req, res) => {
   try{
     const post = await PostModel.findById(req.params.id).populate({ 
-      path: "comments", populate: { path: "postedBy", select: ["fullName", "avatar"] }
+      path: "comments", populate: { path: "postedBy", select: ["fullName", "avatarUrl"] }
     });
     const data = post.comments;
     res.json(data);
@@ -161,8 +189,14 @@ export const removeComment = async (req, res) => {
     res.json({
       message: "Comment Deleted!"
     });
-
-    
+    await PostModel.findOneAndUpdate(
+      {
+        _id: postId
+      },
+      {
+        $inc: { commentsCount: -1 },
+      }
+    );
   } catch (err) {
     console.log(err);
 res.status(500).json({

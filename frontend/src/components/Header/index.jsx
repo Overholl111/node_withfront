@@ -7,16 +7,19 @@ import Container from '@mui/material/Container';
 
 import { useSelector, useDispatch } from "react-redux";
 import { logout, selectorIsAuth } from "../../redux/slices/auth.js";
+import { useNavigate } from "react-router-dom";
 
 
 export const Header = () => {
   const dispatch = useDispatch();
   const isAuth = useSelector(selectorIsAuth);
+  const navigate = useNavigate()
 
   const onClickLogout = () => {
     if (window.confirm('Log out?')) {
       dispatch(logout());
       window.localStorage.removeItem('token');
+      navigate('/')
     }
   };
 

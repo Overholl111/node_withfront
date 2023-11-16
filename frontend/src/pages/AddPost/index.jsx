@@ -2,7 +2,6 @@ import React from 'react';
 import TextField from '@mui/material/TextField';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
-import SimpleMDE from 'react-simplemde-editor';
 
 import { selectorIsAuth } from "../../redux/slices/auth.js";
 import { useSelector } from "react-redux";
@@ -15,7 +14,6 @@ export const AddPost = () => {
   const {id} = useParams();
   const navigate = useNavigate()
   const isAuth = useSelector(selectorIsAuth);
-  const [value, setValue] = React.useState('');
   const [text, setText] = React.useState('');
   const [title, setTitle] = React.useState('');
   const [tags, setTags] = React.useState('');
@@ -24,6 +22,7 @@ export const AddPost = () => {
   const inputPicRef = React.useRef(null);
 
   const isEditing = Boolean(id);
+
 
   const handleChangeFile = async (event) => {
     try{
@@ -34,15 +33,18 @@ export const AddPost = () => {
       setImageUrl(data.url);
     } catch (err) {
       console.warn(err);
-      alert('Failed trying to upload');
+      alert('Не удалось создать статью');
     }
   };
 
-  const onClickRemoveImage = () => {
-    document.getElementById('img').remove();
-  };
-
-
+  const onClickRemoveImage = async () => {
+    try{ 
+      const data = {url: imageUrl}
+      await axios.delete(`/tmp/`, { data });
+      setImageUrl('');
+    } catch (err){
+      alert('Не удалось удалить картинку')
+    }};
 
 
   const onSubmit = async () => {
@@ -56,7 +58,6 @@ export const AddPost = () => {
         text
       }
     
-      const url = imageUrl;
       const { data } = isEditing 
       ? await axios.patch(`/posts/${id}`, fields) 
       :  await axios.post('/posts', fields);
@@ -80,23 +81,8 @@ export const AddPost = () => {
         setText(data.text);
       })
     }
-  }, []);
 
-  const options = React.useMemo(
-    () => ({
-      spellChecker: false,
-      maxHeight: '400px',
-      autofocus: true,
-      placeholder: 'Введите текст...',
-      status: false,
-      autosave: {
-        enabled: true,
-        delay: 1000,
-      },
-    }),
-    [],
-  );
-
+  }, [id]);
   
   if (window.localStorage.getItem('token') && !isAuth) {
     return <Navigate to="/" />;
@@ -113,7 +99,7 @@ export const AddPost = () => {
         <Button variant="contained" color="error" onClick={onClickRemoveImage} >
           Удалить
         </Button>
-        <img className={styles.image} id="img" src={`http://localhost:4444/api${imageUrl}`} alt="Uploaded" />
+        <img className={styles.image} id="img" src={`http://localhost:4444/api/tmp/${imageUrl}`} alt="Uploaded" />
         </>
       )}
       <br />

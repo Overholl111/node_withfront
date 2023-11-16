@@ -11,6 +11,11 @@ export const fetchTags = createAsyncThunk('posts/fetchTags', async () =>{
     return data;
 });
 
+export const fetchPostsByTags = createAsyncThunk('/posts/fetchPostsByTags', async (tag) => {
+    const { data } = await axios.get(`/tags/${tag}`);
+    return data;
+})
+
 export const fetchComments = createAsyncThunk('posts/fetchComments', async (id) =>{
     const { data } = await axios.get(`/posts/${id}/comments`)
     return data;
@@ -28,6 +33,10 @@ const initialState = {
         status: 'loading'
     },
     comments: {
+        items: [],
+        status: 'loading'
+    },
+    tagPosts: {
         items: [],
         status: 'loading'
     }
@@ -63,6 +72,19 @@ const postsSlice = createSlice({
         [fetchTags.rejected]: (state) => {
             state.tags.items = [];
             state.tags.status = 'error';
+        },
+        // Get Posts with certain tags
+        [fetchPostsByTags.pending]: (state) => {
+            state.tagPosts.items = [];
+            state.tagPosts.status = 'loading';
+        },
+        [fetchPostsByTags.fulfilled]: (state, action) => {
+            state.tagPosts.items = action.payload;
+            state.tagPosts.status = 'loaded';
+        },
+        [fetchPostsByTags.rejected]: (state) => {
+            state.tagPosts.items = [];
+            state.tagPosts.status = 'error';
         },
         //Get Comments
         [fetchComments.pending]: (state) => {

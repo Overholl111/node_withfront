@@ -16,6 +16,13 @@ const [text, setText] = React.useState();
 const isAuth = useSelector(selectorIsAuth);
 const params = useParams();
 const id = params.id;
+const {avatarData} = useSelector(state => state.auth.data.userData.avatarUrl);
+const [avatarUrl, setAvatarUrl] = React.useState();
+
+React.useEffect(() => {
+  setAvatarUrl(avatarData);
+},[avatarData])
+
 
 const onSubmit = async () => {
   try {
@@ -36,10 +43,16 @@ const onSubmit = async () => {
   return (
     <>
       <div className={styles.root}>
-        <Avatar
-          classes={{ root: styles.avatar }}
-          src="https://mui.com/static/images/avatar/5.jpg"
-        />
+        {isAuth? (   
+        <>
+          <Avatar alt={avatarUrl} src={`http://localhost:4444/api/tmp/${avatarUrl}`} />
+        </>
+        ) : (
+          <>
+           <Avatar className={styles.avatar}  src={'/noavatar.png'} />
+          </>
+        )}
+   
         <div className={styles.form}>
           {isAuth ? (
             <>
@@ -52,7 +65,7 @@ const onSubmit = async () => {
              />
           
           <Button onClick={onSubmit} size="large" variant="contained">
-          "Отправить"
+          Отправить
         </Button>
             </>
           ) : (

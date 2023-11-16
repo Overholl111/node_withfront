@@ -54,14 +54,14 @@ export const Login = () => {
         label="E-Mail"
         error={Boolean(errors.email?.message)}
         helperText={errors.email?.message}
-        {... register('email', {required: 'Email is required'})}
+        {... register('email', {required: 'Укажите почту'})}
         type="email"
         fullWidth
       />
       <TextField 
       className={styles.field} label="Пароль" 
       helperText={errors.password?.message}
-       {... register('pass', {required: 'Password is required'})}
+       {... register('pass', {required: 'Укажите пароль'})}
        fullWidth />
       <Button type="submit" size="large" variant="contained"
       fullWidth>

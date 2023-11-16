@@ -27,7 +27,7 @@ export const CommentsBlock = ({
                       {isLoading ? (
                         <Skeleton variant="circular" width={40} height={40} />
                       ) : (
-                        <Avatar alt={postedBy} src={'https://mui.com/static/images/avatar/1.jpg'} />
+                        <Avatar alt={avatarUrl} src={`http://localhost:4444/api/tmp/${avatarUrl}`} />
                       )}
                     </ListItemAvatar>
                     {isLoading ? (

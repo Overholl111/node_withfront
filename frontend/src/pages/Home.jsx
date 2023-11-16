@@ -7,12 +7,12 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { Post } from '../components/Post';
 import { TagsBlock } from '../components/TagsBlock';
-import { CommentsBlock } from '../components/CommentsBlock';
 import { fetchPosts, fetchTags } from '../redux/slices/posts.js';
 
 
 
 export const Home = () => {
+  
   const dispatch = useDispatch();
   const { posts, tags } = useSelector(state => state.posts);
   const userData = useSelector(state => state.auth.data);
@@ -23,7 +23,7 @@ export const Home = () => {
   React.useEffect(() => {
     dispatch(fetchPosts());
     dispatch(fetchTags());
-  }, []);
+  }, [dispatch]);
 
 
   return (
@@ -37,14 +37,14 @@ export const Home = () => {
           {(isPostsLoading ? [...Array(5)] : posts.items).map((obj, index) => isPostsLoading ? (
           <Post key={index} isLoading={true}/>
           ) : (
-            <Post
+            <Post key={index}
               id={obj._id}
               title={obj.title}
-              imageUrl={obj.imageUrl? `http://localhost:4444/api/uploads/${obj.imageUrl}` : ''}
+              imageUrl={obj.imageUrl? `http://localhost:4444/api/tmp/${obj.imageUrl}` : ''}
               user={obj.user}
               createdAt={obj.createdAt}
               viewsCount={obj.viewsCount}
-              commentsCount={3}
+              commentsCount={obj.commentsCount}
               tags={obj.tags}
               isEditable={userData?.userData._id 
                 === obj?.user._id}

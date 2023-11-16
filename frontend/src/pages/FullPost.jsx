@@ -12,10 +12,6 @@ import { fetchComments } from "../redux/slices/posts";
 import { SideBlock } from "../components/SideBlock";
 
 
-
-
-
-
 export const FullPost = () => {
   const [data, setData] = React.useState();
   const { comments } = useSelector(state => state.posts);
@@ -23,12 +19,7 @@ export const FullPost = () => {
   const {id} = useParams();
   const dispatch = useDispatch();
 
-
-
-
   React.useEffect(() => {
-
-    const isCommentsLoading = comments.status === 'loading';
 
     dispatch(fetchComments(id));
 
@@ -42,7 +33,8 @@ export const FullPost = () => {
       console.warn(err);
       alert('Error');
     }))
-  },[]);
+
+  },[dispatch, id]);
 
 
 
@@ -55,11 +47,11 @@ export const FullPost = () => {
       <Post
         id={data._id}
         title={data.title}
-        imageUrl={`http://localhost:4444/api/uploads/${data.imageUrl}`}
+        imageUrl={`http://localhost:4444/api/tmp/${data.imageUrl}`}
         user={data.user}
         createdAt={data.createdAt}
         viewsCount={data.viewsCount}
-        commentsCount={3}
+        commentsCount={data.commentsCount}
         tags={data.tags}
         isFullPost
       >
@@ -69,7 +61,8 @@ export const FullPost = () => {
       {(comments !== undefined) ? (comments.items).map((comment, index)  => (    
           <CommentsBlock key={index}
             postedBy={comment.postedBy.fullName}
-            text={comment.text}
+            text={comment.text}D
+            avatarUrl={comment.postedBy.avatarUrl}
             isLoading={false}
       >
             
